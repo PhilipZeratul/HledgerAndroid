@@ -7,4 +7,5 @@
     <string name="button_settings">Setting</string>
     <string name="action_load_accounts">Load common.journal</string>
     <string name="action_save_csv">Save to .csv</string>
+    <string name="intent_bundle">BUNDLE</string>
 </resources>

@@ -14,6 +14,7 @@ import android.view.View;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
@@ -33,9 +34,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     // TODO: Add Transaction activity.
     public void sendMessage(View view) {
         Intent intent = new Intent(this, AddTransactionActivity.class);
-        //EditText editText = (EditText) findViewById(R.id.editText);
-        //String message = editText.getText().toString();
-        //intent.putExtra(EXTRA_MESSAGE, message);
+        Bundle args = new Bundle();
+        args.putSerializable("ARRAYLIST",(Serializable)accounts);
+        intent.putExtra(String.valueOf(R.string.intent_bundle), args);
         startActivity(intent);
     }
 
