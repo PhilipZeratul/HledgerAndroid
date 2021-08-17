@@ -4,4 +4,5 @@
     <string name="add_transaction_activity_name">Add a Transaction</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_add">Add</string>
+    <string name="button_settings">Setting</string>
 </resources>
