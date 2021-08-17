@@ -1,7 +1,7 @@
 package com.phillip.hledgerandroid;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
@@ -11,9 +11,7 @@ import android.provider.DocumentsContract;
 import android.view.MenuItem;
 import android.view.View;
 
-public class MainActivity extends AppCompatActivity {
-
-    public static final String EXTRA_MESSAGE = "com.phillip.hledgerandroid.MESSAGE";
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +30,28 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // TODO: Read in common.journal to know what accounts do I have.
-    // Request code for selecting a PDF document.
-    private static final int PICK_PDF_FILE = 2;
+    public void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.setOnMenuItemClickListener(this);
+        popup.inflate(R.menu.settings);
+        popup.show();
+    }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_load_accounts:
+
+                return true;
+            case R.id.action_save_csv:
+
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // TODO: Read in common.journal to know what accounts do I have.
     private void openFile(Uri pickerInitialUri) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -45,21 +61,6 @@ public class MainActivity extends AppCompatActivity {
         // system file picker when it loads.
         intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
 
-        startActivityForResult(intent, PICK_PDF_FILE);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.button_settings:
-                // User chose the "Settings" item, show the app settings UI...
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-            //ActionBar
-        }
+        startActivityForResult(intent, 2);
     }
 }

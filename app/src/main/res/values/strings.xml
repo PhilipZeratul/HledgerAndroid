@@ -5,4 +5,6 @@
     <string name="edit_message">Enter a message</string>
     <string name="button_add">Add</string>
     <string name="button_settings">Setting</string>
+    <string name="action_load_accounts">Load Accounts</string>
+    <string name="action_save_csv">Save .CSV</string>
 </resources>
