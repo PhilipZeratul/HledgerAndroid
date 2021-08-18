@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
@@ -28,11 +31,11 @@ public class AddTransactionActivity extends AppCompatActivity {
         // Enable the Up button
         ab.setDisplayHomeAsUpEnabled(true);
 
-        populateSpinner();
+        setupSpinner();
+        setupEditText();
     }
 
-    private void populateSpinner()
-    {
+    private void setupSpinner() {
         accounts = ((HledgerAndroid)this.getApplication()).getAccounts();
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -43,5 +46,24 @@ public class AddTransactionActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
         spinner = (Spinner) findViewById(R.id.spinner_account_2);
         spinner.setAdapter(adapter);
+    }
+
+    private void setupEditText() {
+        EditText editText = (EditText) findViewById(R.id.editTextNumberAccount_1);
+        EditText editText2 = (EditText) findViewById(R.id.editTextNumberAccount_2);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Float num = new Float(s.toString());
+                num = -num;
+                editText2.setText(num.toString());
+            }
+        });
     }
 }
