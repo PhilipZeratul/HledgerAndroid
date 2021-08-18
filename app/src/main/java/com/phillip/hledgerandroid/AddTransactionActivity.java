@@ -4,10 +4,14 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -17,6 +21,8 @@ public class AddTransactionActivity extends AppCompatActivity {
 
     private static final String TAG = "HledgerAndroid.AddTransactionActivity";
     private ArrayList<String> accounts = new ArrayList<String>();
+    private EditText editText;
+    private EditText editText2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +39,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         setupSpinner();
         setupEditText();
+        setupFinishedButton();
     }
 
     private void setupSpinner() {
@@ -49,8 +56,8 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void setupEditText() {
-        EditText editText = (EditText) findViewById(R.id.editTextNumberAccount_1);
-        EditText editText2 = (EditText) findViewById(R.id.editTextNumberAccount_2);
+        editText = (EditText) findViewById(R.id.editTextNumberAccount_1);
+        editText2 = (EditText) findViewById(R.id.editTextNumberAccount_2);
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -60,10 +67,34 @@ public class AddTransactionActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                Float num = new Float(s.toString());
-                num = -num;
-                editText2.setText(num.toString());
+                if (TextUtils.isEmpty(s.toString())) {
+                    editText2.getText().clear();
+                }
+                else {
+                    Float num = new Float(s.toString());
+                    num = -num;
+                    editText2.setText(num.toString());
+                }
             }
         });
     }
+
+    private void setupFinishedButton() {
+        Button button = (Button) findViewById(R.id.button_finished);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearEditText();
+            }
+        });
+    }
+
+    private void clearEditText() {
+        editText.getText().clear();
+        editText2.getText().clear();
+    }
+
+    // TODO: TimePicker
+
+    // TODO: Write to .csv file
 }

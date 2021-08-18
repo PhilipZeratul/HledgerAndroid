@@ -5,6 +5,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,14 +13,20 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
+    private static final int INTENT_LOAD_ACCOUNTS = 2;
     private static final String TAG = "HledgerAndroid";
+    private static final String accountsFileName = "accounts.txt";
     private ArrayList<String> accounts = new ArrayList<>();
 
     @Override
@@ -29,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        loadDefaultAccounts();
     }
 
     public void sendMessage(View view) {
@@ -57,13 +66,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-    private static final int LOAD_ACCOUNTS = 2;
-
     private void actionLoadAccounts() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
-        startActivityForResult(intent, LOAD_ACCOUNTS);
+        startActivityForResult(intent, INTENT_LOAD_ACCOUNTS);
     }
 
     @Override
@@ -74,34 +81,73 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
 
         switch (requestCode) {
-            case LOAD_ACCOUNTS:
-                loadAccounts(resultData);
+            case INTENT_LOAD_ACCOUNTS:
+                loadNewAccounts(resultData);
                 break;
             default:
                 break;
         }
     }
 
-    private void loadAccounts(Intent resultData)
+    private void loadDefaultAccounts() {
+        try {
+            FileInputStream in = openFileInput(accountsFileName);
+            parseAccounts(in);
+            in.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadNewAccounts(Intent resultData)
     {
         Uri uri = null;
         if (resultData != null) {
             uri = resultData.getData();
             try {
                 InputStream in = getContentResolver().openInputStream(uri);
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                for (String line; (line = r.readLine()) != null; ) {
-                    if (line.startsWith(";"))
-                        continue;
-                    else if (line.startsWith("account ")) {
-                        String[] splitted = line.split("account |;|  ");
-                        //Log.v(TAG, "+" + splitted[1] + "+");
-                        accounts.add(splitted[1]);
-                    }
-                }
-                // Save accounts to global variable.
-                ((HledgerAndroid)this.getApplication()).setAccounts(accounts);
-            }catch (Exception e) {}
+                parseAccounts(in);
+                saveAccounts(in);
+                in.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void parseAccounts(InputStream in) throws IOException {
+        BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        for (String line; (line = r.readLine()) != null; ) {
+            if (line.startsWith(";"))
+                continue;
+            else if (line.startsWith("account ")) {
+                String[] splitted = line.split("account |;|  ");
+                //Log.v(TAG, "+" + splitted[1] + "+");
+                accounts.add(splitted[1]);
+            }
+        }
+        // Save accounts to global variable.
+        ((HledgerAndroid)this.getApplication()).setAccounts(accounts);
+    }
+
+    // TODO: Figure this out!
+    private void saveAccounts(InputStream in) {
+        FileOutputStream out = null;
+        try {
+            out = openFileOutput(accountsFileName, Context.MODE_PRIVATE);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

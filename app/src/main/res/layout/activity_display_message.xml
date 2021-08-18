@@ -43,6 +43,7 @@
         android:layout_marginTop="133dp"
         android:autofillHints="20.00"
         android:ems="10"
+        android:hint="25.00"
         android:inputType="numberSigned|numberDecimal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
@@ -66,6 +67,7 @@
         android:layout_marginTop="16dp"
         android:autofillHints="20.00"
         android:ems="10"
+        android:hint="-25.00"
         android:inputType="numberSigned|numberDecimal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextNumberAccount_1" />
@@ -80,5 +82,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/editTextNumberAccount_2"
         app:layout_constraintTop_toTopOf="@+id/editTextNumberAccount_2" />
+
+    <Button
+        android:id="@+id/button_finished"
+        android:layout_width="91dp"
+        android:layout_height="87dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/button_finished"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextNumberAccount_2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
