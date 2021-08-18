@@ -31,12 +31,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setSupportActionBar(toolbar);
     }
 
-    // TODO: Add Transaction activity.
     public void sendMessage(View view) {
         Intent intent = new Intent(this, AddTransactionActivity.class);
-        Bundle args = new Bundle();
-        args.putSerializable("ARRAYLIST",(Serializable)accounts);
-        intent.putExtra(String.valueOf(R.string.intent_bundle), args);
         startActivity(intent);
     }
 
@@ -103,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         accounts.add(splitted[1]);
                     }
                 }
+                // Save accounts to global variable.
+                ((HledgerAndroid)this.getApplication()).setAccounts(accounts);
             }catch (Exception e) {}
         }
     }

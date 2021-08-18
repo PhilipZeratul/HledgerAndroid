@@ -2,14 +2,17 @@ package com.phillip.hledgerandroid;
 
 import android.app.Application;
 
-public class HledgerAndroid extends Application {
-    private String someVariable;
+import java.util.ArrayList;
 
-    public String getSomeVariable() {
-        return someVariable;
+public class HledgerAndroid extends Application {
+
+    private ArrayList<String> accounts = new ArrayList<String>();
+
+    public ArrayList<String> getAccounts() {
+        return accounts;
     }
 
-    public void setSomeVariable(String someVariable) {
-        this.someVariable = someVariable;
+    public void setAccounts(ArrayList<String> accounts) {
+        this.accounts = accounts;
     }
 }
