@@ -4,7 +4,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.TimeZone;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -15,14 +16,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class AddTransactionActivity extends AppCompatActivity {
 
     private static final String TAG = "HledgerAndroid.AddTransactionActivity";
     private ArrayList<String> accounts = new ArrayList<String>();
-    private EditText editText;
-    private EditText editText2;
+    private EditText editTextNumber;
+    private EditText editTextNumber2;
+    private Button buttonDate;
+    private String pickedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +47,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         setupSpinner();
         setupEditText();
+        setupDatePicker();
         setupFinishedButton();
     }
 
@@ -61,9 +70,9 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void setupEditText() {
-        editText = (EditText) findViewById(R.id.editTextNumberAccount_1);
-        editText2 = (EditText) findViewById(R.id.editTextNumberAccount_2);
-        editText.addTextChangedListener(new TextWatcher() {
+        editTextNumber = (EditText) findViewById(R.id.editTextNumberAccount_1);
+        editTextNumber2 = (EditText) findViewById(R.id.editTextNumberAccount_2);
+        editTextNumber.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -73,15 +82,43 @@ public class AddTransactionActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (TextUtils.isEmpty(s.toString())) {
-                    editText2.getText().clear();
+                    editTextNumber2.getText().clear();
                 }
                 else {
                     Float num = new Float(s.toString());
                     num = -num;
-                    editText2.setText(num.toString());
+                    editTextNumber2.setText(num.toString());
                 }
             }
         });
+    }
+
+
+    private void setupDatePicker() {
+        buttonDate = (Button) findViewById(R.id.button_date);
+        buttonDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                        .setTitleText("Select Date")
+                        .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                        .build();
+                datePicker.show(getSupportFragmentManager(), datePicker.toString());
+                datePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener() {
+                    @Override
+                    public void onPositiveButtonClick(Object selection) {
+                        TimeZone timeZoneUTC = TimeZone.getDefault();
+                        // It will be negative, so that's the -1
+                        int offsetFromUTC = timeZoneUTC.getOffset(new Date().getTime()) * -1;
+                        SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+                        Date date = new Date((Long) selection + offsetFromUTC);
+                        buttonDate.setText(simpleFormat.format(date));
+                        pickedDate = buttonDate.getText().toString();
+                    }
+                });
+            }
+        });
+        pickedDate = buttonDate.getText().toString();
     }
 
     private void setupFinishedButton() {
@@ -95,8 +132,8 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void clearEditText() {
-        editText.getText().clear();
-        editText2.getText().clear();
+        editTextNumber.getText().clear();
+        editTextNumber2.getText().clear();
     }
 
     // TODO: TimePicker

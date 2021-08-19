@@ -87,10 +87,20 @@
         android:id="@+id/button_finished"
         android:layout_width="91dp"
         android:layout_height="87dp"
-        android:layout_marginTop="50dp"
         android:layout_marginEnd="16dp"
         android:text="@string/button_finished"
+        app:layout_constraintBottom_toBottomOf="@+id/button_date"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/button_date" />
+
+    <Button
+        android:id="@+id/button_date"
+        android:layout_width="168dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="64dp"
+        android:text="2021/08/16"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextNumberAccount_2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
