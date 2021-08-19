@@ -49,10 +49,15 @@ public class AddTransactionActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, accounts);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+        int spinnerPosition = adapter.getPosition("expenses:Food");
+        int spinnerPosition2 = adapter.getPosition("liabilities:PAB Credit Card");
+
         Spinner spinner = (Spinner) findViewById(R.id.spinner_account_1);
         spinner.setAdapter(adapter);
+        spinner.setSelection(spinnerPosition);
         spinner = (Spinner) findViewById(R.id.spinner_account_2);
         spinner.setAdapter(adapter);
+        spinner.setSelection(spinnerPosition2);
     }
 
     private void setupEditText() {
