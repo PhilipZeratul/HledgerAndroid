@@ -118,7 +118,8 @@ public class AddTransactionActivity extends AppCompatActivity {
                 });
             }
         });
-        pickedDate = buttonDate.getText().toString();
+        pickedDate = new SimpleDateFormat("yyyy/MM/dd", Locale.US).format(new Date());
+        buttonDate.setText(pickedDate);
     }
 
     private void setupFinishedButton() {
@@ -136,7 +137,8 @@ public class AddTransactionActivity extends AppCompatActivity {
         editTextNumber2.getText().clear();
     }
 
-    // TODO: TimePicker
-
     // TODO: Write to .csv file
+    private void writeToFile() {
+
+    }
 }
