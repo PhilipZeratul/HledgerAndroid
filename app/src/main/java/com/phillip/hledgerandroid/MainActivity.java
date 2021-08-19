@@ -42,12 +42,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         loadDefaultAccounts();
     }
 
-    public void sendMessage(View view) {
+    public void startAddTransactionActivity(View view) {
         Intent intent = new Intent(this, AddTransactionActivity.class);
         startActivity(intent);
     }
 
-    public void showPopup(View v) {
+    public void showSettingsPopup(View v) {
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(this);
         popup.inflate(R.menu.settings);
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 actionLoadAccounts();
                 return true;
             case R.id.action_save_csv:
-
+                actionSaveCsv();
                 return true;
             default:
                 return false;
@@ -73,6 +73,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
         startActivityForResult(intent, INTENT_LOAD_ACCOUNTS);
+    }
+
+    private void actionSaveCsv() {
+        Intent intent = new Intent(this, FileSelectionActivity.class);
+        startActivity(intent);
     }
 
     @Override

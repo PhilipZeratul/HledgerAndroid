@@ -45,12 +45,10 @@ public class AddTransactionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_message);
 
+        // Setup toolbar.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // Get a support ActionBar corresponding to this toolbar
         ActionBar ab = getSupportActionBar();
-        // Enable the Up button
         ab.setDisplayHomeAsUpEnabled(true);
 
         setupDescription();

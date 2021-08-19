@@ -32,7 +32,6 @@
                 tools:layout_editor_absoluteY="0dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <EditText

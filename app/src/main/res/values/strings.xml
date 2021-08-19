@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">HledgerAndroid</string>
-    <string name="main_activity_name">Hledger Android</string>
-    <string name="add_transaction_activity_name">Add a Transaction</string>
+    <string name="activity_main_name">Hledger Android</string>
+    <string name="activity_add_transaction_name">Add a Transaction</string>
+    <string name="activity_file_selection_name">Select File to Send</string>
     <string name="edit_message">Enter a message</string>
     <string name="button_add">Add</string>
     <string name="button_settings">Setting</string>
