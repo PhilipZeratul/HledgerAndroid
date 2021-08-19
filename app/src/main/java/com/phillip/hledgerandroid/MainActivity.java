@@ -9,9 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -109,9 +111,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             try {
                 InputStream in = getContentResolver().openInputStream(uri);
                 parseAccounts(in);
+                in.close();
+                in = getContentResolver().openInputStream(uri);
                 saveAccounts(in);
                 in.close();
-            } catch (Exception e) {
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -132,22 +138,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         ((HledgerAndroid)this.getApplication()).setAccounts(accounts);
     }
 
-    // TODO: Figure this out!
-    private void saveAccounts(InputStream in) {
-        FileOutputStream out = null;
-        try {
-            out = openFileOutput(accountsFileName, Context.MODE_PRIVATE);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void saveAccounts(InputStream in) throws IOException {
+        FileOutputStream out = openFileOutput(accountsFileName, Context.MODE_PRIVATE);
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
         }
+        out.close();
     }
 }
