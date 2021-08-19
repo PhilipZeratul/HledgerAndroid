@@ -3,6 +3,7 @@ package com.phillip.hledgerandroid;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.view.View;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private static final int INTENT_LOAD_ACCOUNTS = 2;
     private static final String TAG = "HledgerAndroid";
-    private static final String accountsFileName = "accounts.txt";
+
     private ArrayList<String> accounts = new ArrayList<>();
 
     @Override
@@ -76,8 +78,30 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     private void actionSaveCsv() {
-        Intent intent = new Intent(this, FileSelectionActivity.class);
-        startActivity(intent);
+        Intent resultIntent = new Intent(Intent.ACTION_SEND);
+
+        File privateRootDir = getFilesDir();
+        String journalFilePath = privateRootDir.getAbsolutePath() + "/" +
+                ((HledgerAndroid)this.getApplication()).getJournalFileName();
+        File requestFile = new File(journalFilePath);
+
+        try {
+            Uri fileUri = FileProvider.getUriForFile(this,
+                    "com.phillip.hledgerandroid.fileprovider",
+                    requestFile);
+            if (fileUri != null) {
+                // Grant temporary read permission to the content URI
+                resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                resultIntent.setType("text/plain");
+                resultIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                startActivity(resultIntent);
+            } else {
+                // TODO: Display warning message to user.
+            }
+        } catch (IllegalArgumentException e) {
+            Log.e("File Selector",
+                    "The selected file can't be shared: " + requestFile.toString());
+        }
     }
 
     @Override
@@ -98,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private void loadDefaultAccounts() {
         try {
+            String accountsFileName = ((HledgerAndroid)this.getApplication()).getAccountsFileName();
             FileInputStream in = openFileInput(accountsFileName);
             parseAccounts(in);
             in.close();
@@ -144,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     private void saveAccounts(InputStream in) throws IOException {
+        String accountsFileName = ((HledgerAndroid)this.getApplication()).getAccountsFileName();
         FileOutputStream out = openFileOutput(accountsFileName, Context.MODE_PRIVATE);
         byte[] buffer = new byte[1024];
         int read;

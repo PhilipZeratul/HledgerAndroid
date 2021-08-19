@@ -30,7 +30,6 @@ import java.util.Locale;
 
 public class AddTransactionActivity extends AppCompatActivity {
 
-    private static final String journalFileName = "journal.txt";
     private static final String TAG = "HledgerAndroid.AddTransactionActivity";
     private ArrayList<String> accounts = new ArrayList<String>();
     private EditText editTextDescription;
@@ -152,6 +151,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private void writeToFile() {
         FileOutputStream out = null;
         try {
+            String journalFileName = ((HledgerAndroid)this.getApplication()).getJournalFileName();
             out = openFileOutput(journalFileName, Context.MODE_PRIVATE | Context.MODE_APPEND);
 
             StringBuilder builder = new StringBuilder();
