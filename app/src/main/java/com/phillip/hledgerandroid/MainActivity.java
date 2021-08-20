@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -96,7 +97,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 resultIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
                 startActivity(resultIntent);
             } else {
-                // TODO: Display warning message to user.
+                Context context = getApplicationContext();
+                CharSequence text = ((HledgerAndroid)this.getApplication()).getJournalFileName() + "do not exsist!";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             }
         } catch (IllegalArgumentException e) {
             Log.e("File Selector",
@@ -178,4 +183,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
         out.close();
     }
+
+    // TODO: Show transactions in main screen.
 }
