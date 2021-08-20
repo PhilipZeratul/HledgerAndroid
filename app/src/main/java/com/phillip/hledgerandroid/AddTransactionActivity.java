@@ -38,6 +38,7 @@ public class AddTransactionActivity extends AppCompatActivity {
     private Spinner spinner;
     private Spinner spinner2;
     private Button buttonDate;
+    private Button buttonFinished;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,15 +51,21 @@ public class AddTransactionActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
 
-        setupDescription();
+        bindViews();
         setupSpinner();
         setupEditText();
         setupDatePicker();
         setupFinishedButton();
     }
 
-    private void setupDescription() {
+    private void bindViews() {
         editTextDescription = (EditText) findViewById(R.id.editText_description);
+        spinner = (Spinner) findViewById(R.id.spinner_account_1);
+        spinner2 = (Spinner) findViewById(R.id.spinner_account_2);
+        editTextNumber = (EditText) findViewById(R.id.editTextNumber_Account_1);
+        editTextNumber2 = (EditText) findViewById(R.id.editTextNumber_Account_2);
+        buttonDate = (Button) findViewById(R.id.button_date);
+        buttonFinished = (Button) findViewById(R.id.button_finished);
     }
 
     private void setupSpinner() {
@@ -71,17 +78,14 @@ public class AddTransactionActivity extends AppCompatActivity {
         int spinnerPosition = adapter.getPosition("expenses:Food");
         int spinnerPosition2 = adapter.getPosition("liabilities:PAB Credit Card");
 
-        spinner = (Spinner) findViewById(R.id.spinner_account_1);
         spinner.setAdapter(adapter);
         spinner.setSelection(spinnerPosition);
-        spinner2 = (Spinner) findViewById(R.id.spinner_account_2);
         spinner2.setAdapter(adapter);
         spinner2.setSelection(spinnerPosition2);
     }
 
     private void setupEditText() {
-        editTextNumber = (EditText) findViewById(R.id.editTextNumber_Account_1);
-        editTextNumber2 = (EditText) findViewById(R.id.editTextNumber_Account_2);
+        editTextNumber2.setEnabled(false);
         editTextNumber.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -93,11 +97,13 @@ public class AddTransactionActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 if (TextUtils.isEmpty(s.toString())) {
                     editTextNumber2.getText().clear();
+                    buttonFinished.setEnabled(false);
                 }
                 else {
                     Float num = new Float(s.toString());
                     num = -num;
                     editTextNumber2.setText(num.toString());
+                    buttonFinished.setEnabled(true);
                 }
             }
         });
@@ -105,7 +111,6 @@ public class AddTransactionActivity extends AppCompatActivity {
 
 
     private void setupDatePicker() {
-        buttonDate = (Button) findViewById(R.id.button_date);
         buttonDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,12 +136,13 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void setupFinishedButton() {
-        Button button = (Button) findViewById(R.id.button_finished);
-        button.setOnClickListener(new View.OnClickListener() {
+        buttonFinished.setEnabled(false);
+        buttonFinished.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 writeToFile();
                 clearEditText();
+                finish();
             }
         });
     }

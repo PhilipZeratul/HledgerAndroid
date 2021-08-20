@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -33,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private static final String TAG = "HledgerAndroid";
 
     private ArrayList<String> accounts = new ArrayList<>();
+    private float totalExpenses;
+    private float totalRevenues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setSupportActionBar(toolbar);
 
         loadDefaultAccounts();
+        showTransactions();
     }
 
     public void startAddTransactionActivity(View view) {
@@ -97,11 +103,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 resultIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
                 startActivity(resultIntent);
             } else {
-                Context context = getApplicationContext();
                 CharSequence text = ((HledgerAndroid)this.getApplication()).getJournalFileName() + "do not exsist!";
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                showToast(text);
             }
         } catch (IllegalArgumentException e) {
             Log.e("File Selector",
@@ -185,4 +188,70 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     // TODO: Show transactions in main screen.
+    private void showTransactions() {
+        String journalFileName = ((HledgerAndroid)this.getApplication()).getJournalFileName();
+        try {
+            FileInputStream in = openFileInput(journalFileName);
+            BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            ArrayList<String> recyclerDatas = new ArrayList<String>();
+            String[] datas = new String[0];
+
+            for (String line; (line = r.readLine()) != null; ) {
+                if (line.matches("(\\d{4}/\\d{2}/\\d{2}).*")) {
+                    // 2021/08/05.*
+                    String date = "", description = "", account = "", number = "", account2 = "", number2 = "";
+                    String[] splitted = line.split(" ", 2); // splitted[0]: date, splitted[1]: description
+                    date = splitted[0];
+                    if (splitted.length > 1) {
+                        description = splitted[1];
+                    }
+                    line = r.readLine();
+                    splitted = line.split("  ");
+                    for (int i = 0; i < splitted.length; i++) {
+                        if (splitted[i].matches("(?!^-?\\d+\\.?\\d+$)^.+$")) {
+                            account = splitted[i];
+                        } else if (splitted[i].matches("^-?\\d+\\.?\\d+$")) {
+                            number = splitted[i];
+                        }
+                    }
+                    line = r.readLine();
+                    splitted = line.split("  ");
+                    for (int i = 0; i < splitted.length; i++) {
+                        if (splitted[i].matches("(?!^-?\\d+\\.?\\d+$)^.+$")) {
+                            // not 20 / -20.65
+                            account2 = splitted[i];
+                        } else if (splitted[i].matches("^-?\\d+\\.?\\d+$")) {
+                            number2 = splitted[i];
+                        }
+                    }
+                    //Log.v(TAG, "Date: " + date + " Description: " + description + " Account: " + account + " Number: " + number + " Account2: " + account2 + " Number2: " + number2);
+                    recyclerDatas.add("Date: " + date + " Description: " + description + " Account: " + account + " Number: " + number + " Account2: " + account2 + " Number2: " + number2);
+                }
+            }
+            in.close();
+            datas = recyclerDatas.toArray(datas);
+            setupRecycler(datas);
+        } catch (FileNotFoundException e) {
+            CharSequence text = ((HledgerAndroid)this.getApplication()).getJournalFileName() + "not found.";
+            showToast(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupRecycler(String[] datas) {
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        CustomRecyclerAdapter adapter = new CustomRecyclerAdapter(datas);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void showToast(CharSequence text) {
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+    }
+
+    // TODO: Finish text_row_item.xml
 }
