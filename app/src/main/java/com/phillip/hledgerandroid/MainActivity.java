@@ -29,7 +29,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 
+// TODO: Edit/Delete transactions
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private static final int INTENT_LOAD_ACCOUNTS = 2;
@@ -187,14 +189,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         out.close();
     }
 
-    // TODO: Show transactions in main screen.
     private void showTransactions() {
         String journalFileName = ((HledgerAndroid)this.getApplication()).getJournalFileName();
         try {
             FileInputStream in = openFileInput(journalFileName);
             BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            ArrayList<String> recyclerDatas = new ArrayList<String>();
-            String[] datas = new String[0];
+            ArrayList<CustomRecyclerAdapter.Data> recyclerDatas = new ArrayList<CustomRecyclerAdapter.Data>();
+            CustomRecyclerAdapter.Data[] datas = new CustomRecyclerAdapter.Data[0];
 
             for (String line; (line = r.readLine()) != null; ) {
                 if (line.matches("(\\d{4}/\\d{2}/\\d{2}).*")) {
@@ -225,10 +226,18 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         }
                     }
                     //Log.v(TAG, "Date: " + date + " Description: " + description + " Account: " + account + " Number: " + number + " Account2: " + account2 + " Number2: " + number2);
-                    recyclerDatas.add("Date: " + date + " Description: " + description + " Account: " + account + " Number: " + number + " Account2: " + account2 + " Number2: " + number2);
+                    CustomRecyclerAdapter.Data data = new CustomRecyclerAdapter.Data();
+                    data.date = date;
+                    data.description = description;
+                    data.account = account;
+                    data.number = number;
+                    data.account2 = account2;
+                    data.number2 = number2;
+                    recyclerDatas.add(data);
                 }
             }
             in.close();
+            Collections.reverse(recyclerDatas);
             datas = recyclerDatas.toArray(datas);
             setupRecycler(datas);
         } catch (FileNotFoundException e) {
@@ -239,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-    private void setupRecycler(String[] datas) {
+    private void setupRecycler(CustomRecyclerAdapter.Data[] datas) {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         CustomRecyclerAdapter adapter = new CustomRecyclerAdapter(datas);
@@ -252,6 +261,4 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         Toast toast = Toast.makeText(context, text, duration);
         toast.show();
     }
-
-    // TODO: Finish text_row_item.xml
 }
