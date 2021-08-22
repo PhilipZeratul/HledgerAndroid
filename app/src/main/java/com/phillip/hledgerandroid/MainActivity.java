@@ -17,11 +17,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +37,7 @@ import java.util.Collections;
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private static final int INTENT_LOAD_ACCOUNTS = 2;
+    private static final int INTENT_SHARE_JOURNAL = 3;
     private static final String TAG = "HledgerAndroid";
 
     private ArrayList<String> accounts = new ArrayList<>();
@@ -63,6 +62,42 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         showTransactions();
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_load_accounts:
+                actionLoadAccounts();
+                return true;
+            case R.id.action_share_journal:
+                actionShareJournal();
+                return true;
+            case R.id.action_delete_journal:
+                actionDeleteJournal();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+
+        switch (requestCode) {
+            case INTENT_LOAD_ACCOUNTS:
+                if (resultCode != Activity.RESULT_OK) {
+                    return;
+                }
+                loadNewAccounts(resultData);
+                break;
+            case INTENT_SHARE_JOURNAL:
+                // Some how the result code = 0, even if successfully shared.
+                actionDeleteJournal();
+            default:
+                break;
+        }
+    }
+
     public void startAddTransactionActivity(View view) {
         Intent intent = new Intent(this, AddTransactionActivity.class);
         startActivity(intent);
@@ -75,23 +110,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         popup.show();
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_load_accounts:
-                actionLoadAccounts();
-                return true;
-            case R.id.action_save_csv:
-                actionSaveCsv();
-                return true;
-            case R.id.action_delete_csv:
-                actionDeleteCsv();
-                return true;
-            default:
-                return false;
-        }
-    }
-
     private void actionLoadAccounts() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -99,12 +117,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         startActivityForResult(intent, INTENT_LOAD_ACCOUNTS);
     }
 
-    private void actionSaveCsv() {
+    private void actionShareJournal() {
         Intent resultIntent = new Intent(Intent.ACTION_SEND);
 
         File privateRootDir = getFilesDir();
-        String journalFilePath = privateRootDir.getAbsolutePath() + "/" +
-                ((HledgerAndroid)this.getApplication()).getJournalFileName();
+        String journalFileName =((HledgerAndroid)this.getApplication()).getJournalFileName();
+        String journalFilePath = privateRootDir.getAbsolutePath() + "/" + journalFileName;
         File requestFile = new File(journalFilePath);
 
         try {
@@ -116,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 resultIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 resultIntent.setType("text/plain");
                 resultIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
-                startActivity(resultIntent);
+                startActivityForResult(resultIntent, INTENT_SHARE_JOURNAL);
             } else {
                 CharSequence text = ((HledgerAndroid)this.getApplication()).getJournalFileName() + "do not exsist!";
                 showToast(text);
@@ -127,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
-    private void actionDeleteCsv() {
+    private void actionDeleteJournal() {
         String journalFileName = ((HledgerAndroid)this.getApplication()).getJournalFileName();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -135,9 +153,11 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String path = getFilesDir().getAbsolutePath() + journalFileName;
-                        File file = new File(path);
+                        File dir = getFilesDir();
+                        File file = new File(dir, journalFileName);
                         file.delete();
+                        finish();
+                        startActivity(getIntent());
                         dialog.dismiss();
                     }
                 })
@@ -148,22 +168,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     }
                 })
                 .show();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        super.onActivityResult(requestCode, resultCode, resultData);
-        if (resultCode != Activity.RESULT_OK) {
-            return;
-        }
-
-        switch (requestCode) {
-            case INTENT_LOAD_ACCOUNTS:
-                loadNewAccounts(resultData);
-                break;
-            default:
-                break;
-        }
     }
 
     private void loadDefaultAccounts() {
@@ -280,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             datas = recyclerDatas.toArray(datas);
             setupRecycler(datas);
         } catch (FileNotFoundException e) {
-            CharSequence text = ((HledgerAndroid)this.getApplication()).getJournalFileName() + "not found.";
+            CharSequence text = ((HledgerAndroid)this.getApplication()).getJournalFileName() + " not found.";
             showToast(text);
         } catch (IOException e) {
             e.printStackTrace();

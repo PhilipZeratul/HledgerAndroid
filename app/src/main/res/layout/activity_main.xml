@@ -48,9 +48,9 @@
         android:id="@+id/textView_totalExpenses"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Expenses: 178514.26"
-        android:textStyle="bold"
+        android:text="Expenses: 0.0"
         android:textSize="16dp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout2" />
 
@@ -58,9 +58,9 @@
         android:id="@+id/textView_totalRevenues"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Revenues: 20000.00"
-        android:textStyle="bold"
+        android:text="Revenues: 0.0"
         android:textSize="16dp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout2" />
 

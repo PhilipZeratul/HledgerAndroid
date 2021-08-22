@@ -153,7 +153,6 @@ public class AddTransactionActivity extends AppCompatActivity {
         editTextNumber2.getText().clear();
     }
 
-    // TODO: Write to .csv file
     private void writeToFile() {
         FileOutputStream out = null;
         try {

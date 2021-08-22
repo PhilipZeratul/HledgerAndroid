@@ -8,7 +8,7 @@
     <string name="button_settings">Setting</string>
     <string name="button_finished">Add</string>
     <string name="action_load_accounts">Load common.journal</string>
-    <string name="action_save_csv">Save to .csv</string>
-    <string name="action_delete_csv">Delete .csv</string>
+    <string name="action_share_journal">Share journal</string>
+    <string name="action_delete_journal">Delete journal</string>
     <string name="intent_bundle">BUNDLE</string>
 </resources>
