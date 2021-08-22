@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -32,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 // TODO: Edit/Delete transactions
+// TODO: Total expenses & revenues
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private static final int INTENT_LOAD_ACCOUNTS = 2;
@@ -50,6 +54,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setSupportActionBar(toolbar);
 
         loadDefaultAccounts();
+        showTransactions();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         showTransactions();
     }
 
@@ -73,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 return true;
             case R.id.action_save_csv:
                 actionSaveCsv();
+                return true;
+            case R.id.action_delete_csv:
+                actionDeleteCsv();
                 return true;
             default:
                 return false;
@@ -112,6 +125,29 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             Log.e("File Selector",
                     "The selected file can't be shared: " + requestFile.toString());
         }
+    }
+
+    private void actionDeleteCsv() {
+        String journalFileName = ((HledgerAndroid)this.getApplication()).getJournalFileName();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Delete " + journalFileName + "?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String path = getFilesDir().getAbsolutePath() + journalFileName;
+                        File file = new File(path);
+                        file.delete();
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     @Override
@@ -165,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     private void parseAccounts(InputStream in) throws IOException {
         BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        accounts.clear();
         for (String line; (line = r.readLine()) != null; ) {
             if (line.startsWith(";"))
                 continue;
@@ -209,19 +246,20 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     line = r.readLine();
                     splitted = line.split("  ");
                     for (int i = 0; i < splitted.length; i++) {
-                        if (splitted[i].matches("(?!^-?\\d+\\.?\\d+$)^.+$")) {
+                        if (splitted[i].matches("(?!^-?\\d+\\.?\\d*$)^.+$")) {
+                            // not 2 / 20 / -20.65
                             account = splitted[i];
-                        } else if (splitted[i].matches("^-?\\d+\\.?\\d+$")) {
+                        } else if (splitted[i].matches("^-?\\d+\\.?\\d*$")) {
                             number = splitted[i];
                         }
                     }
                     line = r.readLine();
                     splitted = line.split("  ");
                     for (int i = 0; i < splitted.length; i++) {
-                        if (splitted[i].matches("(?!^-?\\d+\\.?\\d+$)^.+$")) {
-                            // not 20 / -20.65
+                        if (splitted[i].matches("(?!^-?\\d+\\.?\\d*$)^.+$")) {
+                            // not 2 / 20 / -20.65
                             account2 = splitted[i];
-                        } else if (splitted[i].matches("^-?\\d+\\.?\\d+$")) {
+                        } else if (splitted[i].matches("^-?\\d+\\.?\\d*$")) {
                             number2 = splitted[i];
                         }
                     }
@@ -237,6 +275,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 }
             }
             in.close();
+            calculateTotals(recyclerDatas);
             Collections.reverse(recyclerDatas);
             datas = recyclerDatas.toArray(datas);
             setupRecycler(datas);
@@ -246,6 +285,37 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void calculateTotals(ArrayList<CustomRecyclerAdapter.Data> recyclerDatas) {
+        totalExpenses = 0.0f;
+        totalRevenues = 0.0f;
+        for (int i = 0; i < recyclerDatas.size(); i++) {
+            String account = recyclerDatas.get(i).account;
+            String account2 = recyclerDatas.get(i).account2;
+            String number = recyclerDatas.get(i).number;
+            String number2 = recyclerDatas.get(i).number2;
+            if (!number.isEmpty()) {
+                if (account.contains("expenses:")) {
+                    totalExpenses += Float.parseFloat(recyclerDatas.get(i).number);
+                } else if (account.contains("revenues:")) {
+                    totalRevenues += Float.parseFloat(recyclerDatas.get(i).number);
+                }
+            }
+            if (!number2.isEmpty()) {
+                if (recyclerDatas.get(i).account2.contains("expenses:")) {
+                    totalExpenses += Float.parseFloat(recyclerDatas.get(i).number2);
+                } else if (account2.contains("revenues:")) {
+                    totalRevenues += Float.parseFloat(recyclerDatas.get(i).number2);
+                }
+            }
+        }
+        totalRevenues = -totalRevenues;
+
+        TextView textViewTotalExpenses = (TextView) findViewById(R.id.textView_totalExpenses);
+        TextView textViewTotalRevenues = (TextView) findViewById(R.id.textView_totalRevenues);
+        textViewTotalExpenses.setText("Expenses: " + Float.toString(totalExpenses));
+        textViewTotalRevenues.setText("Revenues: " + Float.toString(totalRevenues));
     }
 
     private void setupRecycler(CustomRecyclerAdapter.Data[] datas) {

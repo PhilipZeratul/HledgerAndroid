@@ -177,7 +177,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             builder.append("\n");
             builder.append("\n");
 
-            Log.v(TAG, builder.toString());
+            //Log.v(TAG, builder.toString());
             out.write(builder.toString().getBytes());
             out.close();
         } catch (FileNotFoundException e) {
