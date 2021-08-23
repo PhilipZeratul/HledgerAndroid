@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,6 +59,13 @@ public class AddTransactionActivity extends AppCompatActivity {
         setupFinishedButton();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        InputMethodManager imm = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editTextNumber.getWindowToken(), 0);
+    }
+
     private void bindViews() {
         editTextDescription = (EditText) findViewById(R.id.editText_description);
         spinner = (Spinner) findViewById(R.id.spinner_account_1);
@@ -85,6 +93,9 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void setupEditText() {
+        editTextNumber.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         editTextNumber2.setEnabled(false);
         editTextNumber.addTextChangedListener(new TextWatcher() {
             @Override
