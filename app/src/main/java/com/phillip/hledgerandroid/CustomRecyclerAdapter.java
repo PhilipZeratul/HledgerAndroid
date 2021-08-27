@@ -83,7 +83,7 @@ public class CustomRecyclerAdapter extends RecyclerView.Adapter<CustomRecyclerAd
         holder.getAccount().setText(data.account);
         holder.getNumber().setText(data.number);
         holder.getAccount2().setText(data.account2);
-        holder.getNumber2().setText(data.number);
+        holder.getNumber2().setText(data.number2);
     }
 
     @Override
